@@ -72,8 +72,54 @@ async function editProduct(req, res, next) {
  * @param {*} next 
  */
 async function deleteProduct(req, res, next) {
+  try {
+    const response = await Products.destroy(req.params.id);
+
+    if (!response) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.status(204).send(); // Use 204 No Content for successful deletion
+  } catch (err) {
+    console.error(`Error deleting product with ID ${req.params.id}:`, err.message);
+    next(err);
+  }
+}
+
+async function createOrder (req, res, next) {
+  const order = await Orders.create(req.body)
+  res.json(orders)
+}
+
+async function editOrder(req, res, next) {
+  const change = req.body
+  const order = await Orders.edit(req.params.id, change)
+  res.json(order)
+}
+
+/**
+ * Delete an order
+ * @param {object} req
+ * @param {object} res
+ */
+async function deleteOrder(req, res, next) {
+  await Orders.destroy(req.params.id)
   res.json({ success: true })
 }
+
+async function listOrders (req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
+
+  const orders = await Orders.list({ 
+    offset: Number(offset), 
+    limit: Number(limit),
+    productId, 
+    status 
+  })
+
+  res.json(orders)
+}
+
 
 module.exports = autoCatch({
   handleRoot,
@@ -81,5 +127,9 @@ module.exports = autoCatch({
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
+  deleteProduct,
+  listOrders,
+  createOrder,
+  editOrder,
+  deleteOrder
 });
